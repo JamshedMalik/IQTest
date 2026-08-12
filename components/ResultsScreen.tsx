@@ -17,7 +17,7 @@ export default function ResultsScreen({ name, results, onRetake }: ResultsScreen
 
       <div className="flex flex-col items-center gap-1">
         <div className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-          {name}&apos;s Score
+          {name}&apos;s Estimated IQ Level
         </div>
         <div className="text-7xl font-extrabold bg-gradient-to-r from-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
           {results.estimatedIQ}
@@ -50,6 +50,40 @@ export default function ResultsScreen({ name, results, onRetake }: ResultsScreen
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 text-left">
+        <h2 className="mb-3 text-center text-sm font-bold uppercase tracking-wide text-slate-500">
+          {results.missed.length === 0
+            ? "Questions to Review"
+            : `Questions to Review (${results.missed.length})`}
+        </h2>
+        {results.missed.length === 0 ? (
+          <p className="text-center text-sm text-slate-500">
+            You got every question right! 🎉
+          </p>
+        ) : (
+          <div className="flex max-h-80 flex-col gap-3 overflow-y-auto pr-1">
+            {results.missed.map(({ question, selectedIndex }) => (
+              <div key={question.id} className="rounded-xl border border-slate-100 p-3">
+                <div className="mb-2">
+                  <CategoryBadge category={question.category} />
+                </div>
+                <p className="mb-2 whitespace-pre-line text-sm font-semibold text-slate-800">
+                  {question.prompt}
+                </p>
+                <div className="flex flex-col gap-0.5 text-xs">
+                  <span className="text-red-600">
+                    Your answer: {selectedIndex !== null ? question.options[selectedIndex] : "No answer"}
+                  </span>
+                  <span className="text-green-600">
+                    Correct answer: {question.options[question.correctIndex]}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <p className="max-w-sm rounded-xl bg-slate-50 p-3 text-xs text-slate-500">

@@ -19,6 +19,11 @@ export interface CategoryBreakdown {
   total: number;
 }
 
+export interface MissedQuestion {
+  question: Question;
+  selectedIndex: number | null;
+}
+
 export interface ResultsData {
   estimatedIQ: number;
   tierLabel: string;
@@ -26,4 +31,5 @@ export interface ResultsData {
   totalCorrect: number;
   totalQuestions: number;
   categoryBreakdown: CategoryBreakdown[];
+  missed: MissedQuestion[];
 }

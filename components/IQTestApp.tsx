@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useReducer, useSyncExternalStore } from "react";
 import { questions } from "@/lib/questions";
 import { computeResults } from "@/lib/scoring";
-import { shuffle } from "@/lib/shuffle";
+import { pickTestQuestions, TEST_LENGTH } from "@/lib/selectTest";
 import { loadProgress, saveProgress, clearProgress } from "@/lib/storage";
 import type { Question, Screen } from "@/lib/types";
 import WelcomeScreen from "./WelcomeScreen";
@@ -29,9 +29,9 @@ function initialState(): State {
   return {
     screen: "welcome",
     name: "",
-    questionOrder: questions,
+    questionOrder: [],
     currentIndex: 0,
-    answers: Array(questions.length).fill(null),
+    answers: Array(TEST_LENGTH).fill(null),
   };
 }
 
@@ -44,9 +44,9 @@ function reducer(state: State, action: Action): State {
         ...state,
         screen: "test",
         name: action.name,
-        questionOrder: shuffle(questions),
+        questionOrder: pickTestQuestions(questions),
         currentIndex: 0,
-        answers: Array(questions.length).fill(null),
+        answers: Array(TEST_LENGTH).fill(null),
       };
     case "SELECT": {
       const answers = [...state.answers];
@@ -129,7 +129,7 @@ export default function IQTestApp() {
   if (state.screen === "welcome") {
     return (
       <WelcomeScreen
-        totalQuestions={questions.length}
+        totalQuestions={TEST_LENGTH}
         onStart={(name) => dispatch({ type: "START", name })}
       />
     );

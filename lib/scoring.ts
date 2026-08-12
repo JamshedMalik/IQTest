@@ -1,4 +1,4 @@
-import type { Category, CategoryBreakdown, Question, ResultsData } from "./types";
+import type { Category, CategoryBreakdown, MissedQuestion, Question, ResultsData } from "./types";
 
 const DIFFICULTY_WEIGHT: Record<Question["difficulty"], number> = {
   easy: 1,
@@ -14,19 +14,25 @@ const CATEGORY_ORDER: Category[] = ["pattern", "logic", "math", "verbal"];
  * assume a rough population distribution for the weighted score and map it
  * onto the familiar IQ scale (mean 100, SD 15) with a z-score. These two
  * constants are the editable assumption: "a typical 10-year-old scores
- * around this % of weighted points, with about this much spread."
+ * around this % of weighted points, with about this much spread." The
+ * question pool is intentionally weighted toward medium/hard questions
+ * (20% easy / 40% medium / 40% hard per category), so the assumed mean is
+ * set lower than a 50/50 coin-flip baseline would suggest.
  */
-const ASSUMED_MEAN_PERCENT = 55;
-const ASSUMED_SD_PERCENT = 17;
+const ASSUMED_MEAN_PERCENT = 48;
+const ASSUMED_SD_PERCENT = 18;
 
 const MIN_DISPLAY_IQ = 55;
 const MAX_DISPLAY_IQ = 145;
 
+/** Kid-friendly versions of the classification bands real IQ tests use. */
 function tierLabelFor(estimatedIQ: number): string {
-  if (estimatedIQ < 90) return "Sharp Thinker in Training";
-  if (estimatedIQ < 110) return "Great Thinker";
-  if (estimatedIQ < 125) return "Super Sharp Thinker";
-  return "Puzzle Master";
+  if (estimatedIQ < 80) return "Developing Thinker";
+  if (estimatedIQ < 90) return "Below Average";
+  if (estimatedIQ < 110) return "Average";
+  if (estimatedIQ < 120) return "Above Average";
+  if (estimatedIQ < 130) return "Superior";
+  return "Very Superior";
 }
 
 export function computeResults(
@@ -36,6 +42,7 @@ export function computeResults(
   let earnedPoints = 0;
   let maxPoints = 0;
   let totalCorrect = 0;
+  const missed: MissedQuestion[] = [];
 
   const breakdownMap = new Map<Category, CategoryBreakdown>(
     CATEGORY_ORDER.map((category) => [category, { category, correct: 0, total: 0 }]),
@@ -48,11 +55,14 @@ export function computeResults(
     const entry = breakdownMap.get(question.category)!;
     entry.total += 1;
 
-    const isCorrect = answers[index] === question.correctIndex;
+    const selectedIndex = answers[index];
+    const isCorrect = selectedIndex === question.correctIndex;
     if (isCorrect) {
       earnedPoints += weight;
       totalCorrect += 1;
       entry.correct += 1;
+    } else {
+      missed.push({ question, selectedIndex });
     }
   });
 
@@ -68,5 +78,6 @@ export function computeResults(
     totalCorrect,
     totalQuestions: questions.length,
     categoryBreakdown: CATEGORY_ORDER.map((category) => breakdownMap.get(category)!),
+    missed,
   };
 }
