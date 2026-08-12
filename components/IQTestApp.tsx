@@ -11,13 +11,14 @@ import ResultsScreen from "./ResultsScreen";
 
 interface State {
   screen: Screen;
+  name: string;
   currentIndex: number;
   answers: (number | null)[];
 }
 
 type Action =
   | { type: "HYDRATE"; state: State }
-  | { type: "START" }
+  | { type: "START"; name: string }
   | { type: "SELECT"; optionIndex: number }
   | { type: "NEXT" }
   | { type: "RESTART" };
@@ -25,6 +26,7 @@ type Action =
 function initialState(): State {
   return {
     screen: "welcome",
+    name: "",
     currentIndex: 0,
     answers: Array(questions.length).fill(null),
   };
@@ -35,7 +37,7 @@ function reducer(state: State, action: Action): State {
     case "HYDRATE":
       return action.state;
     case "START":
-      return { ...state, screen: "test" };
+      return { ...state, screen: "test", name: action.name };
     case "SELECT": {
       const answers = [...state.answers];
       answers[state.currentIndex] = action.optionIndex;
@@ -83,6 +85,7 @@ export default function IQTestApp() {
         type: "HYDRATE",
         state: {
           screen: saved.screen,
+          name: saved.name,
           currentIndex: saved.currentIndex,
           answers: saved.answers,
         },
@@ -98,6 +101,7 @@ export default function IQTestApp() {
     }
     saveProgress({
       screen: state.screen,
+      name: state.name,
       currentIndex: state.currentIndex,
       answers: state.answers,
     });
@@ -114,7 +118,7 @@ export default function IQTestApp() {
     return (
       <WelcomeScreen
         totalQuestions={questions.length}
-        onStart={() => dispatch({ type: "START" })}
+        onStart={(name) => dispatch({ type: "START", name })}
       />
     );
   }
@@ -136,6 +140,7 @@ export default function IQTestApp() {
   if (state.screen === "results" && results) {
     return (
       <ResultsScreen
+        name={state.name}
         results={results}
         onRetake={() => dispatch({ type: "RESTART" })}
       />

@@ -2,17 +2,23 @@ import type { ResultsData } from "@/lib/types";
 import CategoryBadge from "./CategoryBadge";
 
 interface ResultsScreenProps {
+  name: string;
   results: ResultsData;
   onRetake: () => void;
 }
 
-export default function ResultsScreen({ results, onRetake }: ResultsScreenProps) {
+export default function ResultsScreen({ name, results, onRetake }: ResultsScreenProps) {
   return (
     <div className="flex flex-col items-center text-center gap-6 py-6">
       <div className="text-6xl">🏆</div>
-      <h1 className="text-2xl font-bold text-slate-700">Challenge Complete!</h1>
+      <h1 className="text-2xl font-bold text-slate-700">
+        Great job, {name}!
+      </h1>
 
       <div className="flex flex-col items-center gap-1">
+        <div className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          {name}&apos;s Score
+        </div>
         <div className="text-7xl font-extrabold bg-gradient-to-r from-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
           {results.estimatedIQ}
         </div>

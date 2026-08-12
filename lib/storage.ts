@@ -1,11 +1,12 @@
 import type { Screen } from "./types";
 
 const STORAGE_KEY = "iq-test-progress";
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 export interface SavedProgress {
   schemaVersion: number;
   screen: Screen;
+  name: string;
   currentIndex: number;
   answers: (number | null)[];
 }

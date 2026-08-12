@@ -1,9 +1,21 @@
+"use client";
+
+import { useState } from "react";
+
 interface WelcomeScreenProps {
   totalQuestions: number;
-  onStart: () => void;
+  onStart: (name: string) => void;
 }
 
 export default function WelcomeScreen({ totalQuestions, onStart }: WelcomeScreenProps) {
+  const [name, setName] = useState("");
+  const trimmedName = name.trim();
+
+  const handleStart = () => {
+    if (!trimmedName) return;
+    onStart(trimmedName);
+  };
+
   return (
     <div className="flex flex-col items-center text-center gap-6 py-8">
       <div className="text-7xl">🧠✨</div>
@@ -23,10 +35,30 @@ export default function WelcomeScreen({ totalQuestions, onStart }: WelcomeScreen
       <p className="max-w-sm text-slate-500">
         Takes about 25–30 minutes. There&apos;s no timer, so take your time and just do your best!
       </p>
+
+      <div className="flex w-full max-w-xs flex-col gap-1.5">
+        <label htmlFor="player-name" className="text-sm font-semibold text-slate-600">
+          What&apos;s your name?
+        </label>
+        <input
+          id="player-name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleStart();
+          }}
+          placeholder="Type your name"
+          maxLength={40}
+          className="w-full rounded-full border-4 border-slate-200 px-5 py-3 text-center text-lg font-semibold text-slate-800 focus:border-fuchsia-400 focus:outline-none"
+        />
+      </div>
+
       <button
         type="button"
-        onClick={onStart}
-        className="mt-2 rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-400 px-10 py-4 text-xl font-bold text-white shadow-lg transition-transform hover:scale-105 cursor-pointer"
+        onClick={handleStart}
+        disabled={!trimmedName}
+        className="mt-2 rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-400 px-10 py-4 text-xl font-bold text-white shadow-lg transition-transform enabled:hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
       >
         Start the Challenge! 🚀
       </button>
