@@ -1,12 +1,13 @@
-import type { Screen } from "./types";
+import type { Question, Screen } from "./types";
 
 const STORAGE_KEY = "iq-test-progress";
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 export interface SavedProgress {
   schemaVersion: number;
   screen: Screen;
   name: string;
+  questionOrder: Question[];
   currentIndex: number;
   answers: (number | null)[];
 }

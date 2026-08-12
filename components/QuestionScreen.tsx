@@ -6,6 +6,7 @@ import AnswerCard from "./AnswerCard";
 const LETTERS = ["A", "B", "C", "D"];
 
 interface QuestionScreenProps {
+  name: string;
   question: Question;
   questionNumber: number;
   totalQuestions: number;
@@ -15,6 +16,7 @@ interface QuestionScreenProps {
 }
 
 export default function QuestionScreen({
+  name,
   question,
   questionNumber,
   totalQuestions,
@@ -26,6 +28,10 @@ export default function QuestionScreen({
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="text-center text-sm font-bold text-fuchsia-500">
+        {name}&apos;s Big Brain Challenge 🧠
+      </div>
+
       <ProgressBar current={questionNumber} total={totalQuestions} />
 
       <div className="flex justify-center">

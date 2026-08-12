@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useReducer, useSyncExternalStore } from "react";
 import { questions } from "@/lib/questions";
 import { computeResults } from "@/lib/scoring";
+import { shuffle } from "@/lib/shuffle";
 import { loadProgress, saveProgress, clearProgress } from "@/lib/storage";
-import type { Screen } from "@/lib/types";
+import type { Question, Screen } from "@/lib/types";
 import WelcomeScreen from "./WelcomeScreen";
 import QuestionScreen from "./QuestionScreen";
 import ResultsScreen from "./ResultsScreen";
@@ -12,6 +13,7 @@ import ResultsScreen from "./ResultsScreen";
 interface State {
   screen: Screen;
   name: string;
+  questionOrder: Question[];
   currentIndex: number;
   answers: (number | null)[];
 }
@@ -27,6 +29,7 @@ function initialState(): State {
   return {
     screen: "welcome",
     name: "",
+    questionOrder: questions,
     currentIndex: 0,
     answers: Array(questions.length).fill(null),
   };
@@ -37,14 +40,21 @@ function reducer(state: State, action: Action): State {
     case "HYDRATE":
       return action.state;
     case "START":
-      return { ...state, screen: "test", name: action.name };
+      return {
+        ...state,
+        screen: "test",
+        name: action.name,
+        questionOrder: shuffle(questions),
+        currentIndex: 0,
+        answers: Array(questions.length).fill(null),
+      };
     case "SELECT": {
       const answers = [...state.answers];
       answers[state.currentIndex] = action.optionIndex;
       return { ...state, answers };
     }
     case "NEXT": {
-      const isLast = state.currentIndex === questions.length - 1;
+      const isLast = state.currentIndex === state.questionOrder.length - 1;
       if (isLast) {
         return { ...state, screen: "results" };
       }
@@ -86,6 +96,7 @@ export default function IQTestApp() {
         state: {
           screen: saved.screen,
           name: saved.name,
+          questionOrder: saved.questionOrder,
           currentIndex: saved.currentIndex,
           answers: saved.answers,
         },
@@ -102,6 +113,7 @@ export default function IQTestApp() {
     saveProgress({
       screen: state.screen,
       name: state.name,
+      questionOrder: state.questionOrder,
       currentIndex: state.currentIndex,
       answers: state.answers,
     });
@@ -109,8 +121,8 @@ export default function IQTestApp() {
 
   const results = useMemo(() => {
     if (state.screen !== "results") return null;
-    return computeResults(state.answers, questions);
-  }, [state.screen, state.answers]);
+    return computeResults(state.answers, state.questionOrder);
+  }, [state.screen, state.answers, state.questionOrder]);
 
   if (!hydrated) return null;
 
@@ -124,12 +136,13 @@ export default function IQTestApp() {
   }
 
   if (state.screen === "test") {
-    const question = questions[state.currentIndex];
+    const question = state.questionOrder[state.currentIndex];
     return (
       <QuestionScreen
+        name={state.name}
         question={question}
         questionNumber={state.currentIndex + 1}
-        totalQuestions={questions.length}
+        totalQuestions={state.questionOrder.length}
         selectedOption={state.answers[state.currentIndex]}
         onSelect={(optionIndex) => dispatch({ type: "SELECT", optionIndex })}
         onNext={() => dispatch({ type: "NEXT" })}
